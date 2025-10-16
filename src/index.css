@@ -1,0 +1,111 @@
+/* All the configs & default css here */
+
+@import url('./styles/style.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import 'tailwindcss';
+
+:root {
+  --family-primary: 'Inter', sans-serif;
+  --base-font-size: 16px;
+  --base-line-height: 1.3;
+  --base-spacing: 1rem;
+}
+
+body,
+html {
+  font-family: var(--family-primary);
+  font-size: var(--base-font-size);
+  line-height: var(--base-line-height);
+
+  background-color: black;
+
+  color: white;
+  overflow-x: hidden;
+
+  box-sizing: border-box;
+
+  scroll-behavior: smooth;
+
+  margin: 0;
+}
+
+p {
+  line-height: 1.3;
+}
+
+/* TAILWIND CONFIGURATION */
+
+@theme {
+  /* Colors */
+  --color-primary: #a0ff06;
+  --color-secondary: #969696;
+  --color-green: #03a66d;
+  --color-bgGray: #141414;
+  --color-borderGray: #2c2c2c;
+
+  /* Font Families */
+  --font-primary: 'Inter', sans-serif;
+
+  /* Font Size */
+  --text-xxs: 0.625rem; /* 10px */
+
+  /* Screen Size */
+  --breakpoint-2xs: 20rem; /* 320px */
+  --breakpoint-xs: 24rem; /* 384px */
+  --breakpoint-sm: 30rem; /* 480px */
+  --breakpoint-md: 48rem; /* 768px */
+  --breakpoint-lg: 64rem; /* 1024px */
+  --breakpoint-xl: 80rem; /* 1280px */
+  --breakpoint-2xl: 90rem; /* 1440px */
+  --breakpoint-3xl: 100rem; /* 1600px */
+  --breakpoint-4xl: 120rem; /* 1920px */
+
+  /* Container Size */
+  --container-2xs: 20rem; /* 320px */
+  --container-xs: 24rem; /* 384px */
+  --container-sm: 30rem; /* 480px */
+  --container-md: 48rem; /* 768px */
+  --container-lg: 64rem; /* 1024px */
+  --container-xl: 80rem; /* 1280px */
+  --container-2xl: 90rem; /* 1440px */
+  --container-3xl: 100rem; /* 1600px */
+  --container-4xl: 120rem; /* 1920px */
+}
+
+/* Custom Utility Classes */
+
+@utility flex-centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+@utility centered-xy {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@layer utilities {
+  .path-fill g > g > line,
+  .path-fill g > g > path,
+  .path-fill g > g > rect,
+  .path-fill g > path,
+  .path-fill path,
+  .path-fill g > line,
+  .path-fill line {
+    fill: currentColor;
+  }
+  .path-stroke g > g > line,
+  .path-stroke g > g > path,
+  .path-stroke g > g > rect,
+  .path-stroke g > path,
+  .path-stroke path,
+  .path-stroke g > line,
+  .path-stroke line {
+    stroke: currentColor;
+  }
+  .shadow-primary-avg {
+    box-shadow: 0px 0px 15px var(--color-primary);
+  }
+}
