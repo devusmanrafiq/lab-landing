@@ -5,8 +5,6 @@ import ReactECharts from 'echarts-for-react';
 
 import Card from 'components/core-ui/card/card';
 
-import { formatCurrency } from 'utils/currency';
-
 import { useTokenPurchaseData } from '../core/hooks/use-token-purchase-data';
 
 function PurchaseChart() {
@@ -71,7 +69,7 @@ function PurchaseChart() {
       yAxis: [
         {
           type: 'value',
-          name: 'Amount (LAB)',
+          name: 'Amount (BNB)',
           nameTextStyle: {
             color: '#888888',
           },
@@ -177,7 +175,7 @@ function PurchaseChart() {
               
               <div style="margin-bottom: 8px;">
                 <span style="color: #a0ff06; font-size: 14px;">●</span>
-                <span style="color: #ffffff; margin-left: 8px;">Purchases: ${formatCurrency.lab(purchasesValue)}</span>
+                <span style="color: #ffffff; margin-left: 8px;">Purchases: ${purchasesValue.toFixed(2)} BNB</span>
               </div>
             </div>
           `;

@@ -64,6 +64,8 @@ export const transformApiToPurchaseChart = (apiData: TokenPurchaseApiResponse, d
 
   sortedDates.forEach((date) => {
     const dayData = dailyData[date];
+    // Since we want to show LAB token purchases, we need to calculate LAB amounts from the individual transactions
+    // For now, we'll use quoteAmount (BNB) but we need to clarify what should be displayed
     const totalPurchases = dayData.reduce((sum, item) => sum + item.quoteAmount, 0);
 
     dates.push(formatChartDate(date));
