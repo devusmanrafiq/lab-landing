@@ -4,17 +4,11 @@ import { QUERIES_KEYS } from 'helpers/crud-helper/consts';
 
 import { tokenPurchases } from 'pages/home/core/_requests';
 
-/**
- * API Integration for Token Purchase Data
- * Maps your actual API response to chart and table components
- */
-
-// Your actual API response interface
 export interface TokenPurchaseApiResponse {
   data: {
     _id: string;
     baseAmount: number; // Amount in LAB tokens
-    quoteAmount: number; // Amount in SOL
+    quoteAmount: number; // Amount in BNB
     quoteAmountUsd: number; // Amount in USD
     price: number; // Price per token
     // Add these if available from your API:
@@ -22,7 +16,7 @@ export interface TokenPurchaseApiResponse {
     dailyRevenuePercent?: number; // % of daily revenue
   }[];
   timeseries: {
-    quoteAmount: number; // SOL amount
+    quoteAmount: number; // BNB amount
     time: string; // ISO timestamp
   }[];
   totalCount: number;
@@ -39,8 +33,6 @@ export const transformApiToPurchaseTable = (apiData: TokenPurchaseApiResponse) =
     amountSol: formatNumber(item.quoteAmount, 2), // e.g., "19,680.32"
     amountUsd: formatNumber(item.quoteAmountUsd, 2), // e.g., "68,668.65"
     price: `$${item.price.toFixed(6)}`, // e.g., "$2.278700"
-    dailyRevenuePercent: item.dailyRevenuePercent ? `${item.dailyRevenuePercent.toFixed(3)}%` : 'N/A', // You'll need this from API
-    revenue: `${formatNumber(item.quoteAmount * 0.95, 2)} SOL`, // Assuming 5% fee
     time: item.time
       ? formatPurchaseTime(item.time)
       : formatPurchaseTime(apiData.timeseries[index]?.time || new Date().toISOString()),
@@ -50,8 +42,8 @@ export const transformApiToPurchaseTable = (apiData: TokenPurchaseApiResponse) =
   }));
 };
 
-// Transform your timeseries data for the Revenue Chart
-export const transformApiToRevenueChart = (apiData: TokenPurchaseApiResponse, daysLimit: number = 30) => {
+// Transform your timeseries data for the Purchase Chart (simplified)
+export const transformApiToPurchaseChart = (apiData: TokenPurchaseApiResponse, daysLimit: number = 30) => {
   // Filter timeseries to last N days to avoid overwhelming the chart
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - daysLimit);
@@ -65,33 +57,22 @@ export const transformApiToRevenueChart = (apiData: TokenPurchaseApiResponse, da
   const dailyData = groupByDay(recentTimeseries);
 
   const dates: string[] = [];
-  const revenue: number[] = [];
   const purchases: number[] = [];
-  const purchasePercentages: number[] = [];
 
   // Sort dates to ensure chronological order
   const sortedDates = Object.keys(dailyData).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
-  sortedDates.forEach((date, index) => {
+  sortedDates.forEach((date) => {
     const dayData = dailyData[date];
     const totalPurchases = dayData.reduce((sum, item) => sum + item.quoteAmount, 0);
-    const totalRevenue = totalPurchases * 0.05; // Assuming 5% fee goes to revenue
-
-    // Calculate percentage of previous day (if available)
-    const prevRevenue = index > 0 ? revenue[index - 1] : totalRevenue;
-    const percentage = prevRevenue > 0 ? (totalPurchases / prevRevenue) * 100 : 100;
 
     dates.push(formatChartDate(date));
-    revenue.push(totalRevenue);
     purchases.push(totalPurchases);
-    purchasePercentages.push(Math.min(percentage, 250)); // Cap at 250%
   });
 
   return {
     dates,
-    revenue,
     purchases,
-    purchasePercentages,
     totalDataPoints: apiData.timeseries.length,
     filteredDataPoints: recentTimeseries.length,
     dateRange: {
@@ -158,7 +139,7 @@ export const useTokenPurchaseData = () => {
   });
 
   const tableData = data?.data ? transformApiToPurchaseTable(data?.data) : [];
-  const chartData = data?.data ? transformApiToRevenueChart(data?.data) : null;
+  const chartData = data?.data ? transformApiToPurchaseChart(data?.data) : null;
 
   return {
     tableData,

@@ -1,59 +1,13 @@
 /**
- * Utility functions for currency conversion and price fetching
+ * Utility functions for currency formatting
  */
-
-// Cache for SOL price to avoid too many API calls
-let solPriceCache: { price: number; timestamp: number } | null = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-/**
- * Fetch current SOL price in USD
- * Uses CoinGecko API (free tier)
- */
-export const fetchSOLPrice = async (): Promise<number> => {
-  try {
-    // Check cache first
-    if (solPriceCache && Date.now() - solPriceCache.timestamp < CACHE_DURATION) {
-      return solPriceCache.price;
-    }
-
-    // Fetch from CoinGecko API (free)
-    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch SOL price');
-    }
-
-    const data = await response.json();
-    const price = data.solana?.usd || 150; // Fallback to $150 if API fails
-
-    // Update cache
-    solPriceCache = {
-      price,
-      timestamp: Date.now(),
-    };
-
-    return price;
-  } catch {
-    // Failed to fetch SOL price, using fallback
-    return 150; // Fallback price
-  }
-};
-
-/**
- * Convert SOL amount to USD
- */
-export const solToUSD = (solAmount: number, solPrice?: number): number => {
-  const price = solPrice || solPriceCache?.price || 150;
-  return solAmount * price;
-};
 
 /**
  * Format currency values for display
  */
 export const formatCurrency = {
-  sol: (amount: number): string => {
-    return `${amount.toLocaleString()} SOL`;
+  lab: (amount: number): string => {
+    return `${amount.toLocaleString()} LAB`;
   },
 
   usd: (amount: number): string => {
@@ -83,18 +37,4 @@ export const formatDate = {
   axis: (dateStr: string): string => {
     return dateStr; // Keep MM/DD/YYYY format for axis
   },
-};
-
-/**
- * Hook to get current SOL price with automatic updates
- */
-export const useSOLPrice = () => {
-  const getCurrentPrice = async () => {
-    return await fetchSOLPrice();
-  };
-
-  return {
-    getCurrentPrice,
-    getCachedPrice: () => solPriceCache?.price || 150,
-  };
 };
