@@ -1,5 +1,5 @@
 const QUERIES_KEYS = {
-  LIST: 'list',
+  TOKEN_PURCHASES: 'token-purchases',
 };
 
 export { QUERIES_KEYS };

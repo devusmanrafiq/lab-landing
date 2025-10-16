@@ -4,9 +4,9 @@ currentBranch=$(git branch --show-current);
 
 echo "Current Branch: $currentBranch";
 
-if [ $currentBranch != "master" ]
+if [ $currentBranch != "main" ]
 then
-    echo "Invalid branch checked out for this master"
+    echo "Invalid branch checked out for this main"
     exit 2;
 fi
 
@@ -23,11 +23,11 @@ then
     exit 2;
 fi
 
-cp envs/.env.prod .env
+# cp envs/.env.prod .env
 yarn install
 npm run build:prod
-aws s3 sync  --profile [aws-configs-profile-name] ./dist s3://[bucket-name]
-aws cloudfront create-invalidation --profile aws-configs-profile-name --distribution-id [id] --paths "/*"
-cp envs/.env.local .env
+aws s3 sync  --profile memes-lab ./dist s3://lab-purchases
+aws cloudfront create-invalidation --profile memes-lab --distribution-id E2SGUMGGQ93Z3T --paths "/*"
+# cp envs/.env.local .env
 
 # Replace with your own configs, [aws-configs-profile-name], [bucket-name], [id]

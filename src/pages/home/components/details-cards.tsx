@@ -1,10 +1,11 @@
 import Card from 'components/core-ui/card/card';
 
+// import CLockIcon from 'assets/icons/clock-icon.svg?react';
 import WaveIcon from 'assets/icons/wave-icon.svg?react';
 
 function DetailsCards() {
   return (
-    <section className='grid grid-cols-4 gap-x-8 mt-20 max-w-2xl mx-auto'>
+    <section className='grid grid-cols-4 gap-x-8 mt-20'>
       <Card>
         <div className='flex items-center gap-2'>
           <WaveIcon />
