@@ -69,7 +69,7 @@ function PurchaseChart() {
       yAxis: [
         {
           type: 'value',
-          name: 'Amount (LAB)',
+          name: 'Amount (BNB)',
           nameTextStyle: {
             color: '#888888',
           },
@@ -93,7 +93,7 @@ function PurchaseChart() {
       ],
       series: [
         {
-          name: 'Purchases (LAB)',
+          name: 'Purchases (BNB)',
           type: 'line',
           yAxisIndex: 0,
           data: purchases,
@@ -175,7 +175,7 @@ function PurchaseChart() {
               
               <div style="margin-bottom: 8px;">
                 <span style="color: #a0ff06; font-size: 14px;">●</span>
-                <span style="color: #ffffff; margin-left: 8px;">Purchases: ${purchasesValue.toFixed(2)} LAB</span>
+                <span style="color: #ffffff; margin-left: 8px;">Purchases: ${purchasesValue.toFixed(2)} BNB</span>
               </div>
             </div>
           `;
