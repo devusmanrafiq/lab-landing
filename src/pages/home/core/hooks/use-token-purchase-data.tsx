@@ -32,7 +32,7 @@ export const transformApiToPurchaseTable = (apiData: TokenPurchaseApiResponse) =
     amountPump: formatTokenAmount(item.baseAmount), // e.g., "8.6K" or "8.6M"
     amountSol: formatNumber(item.quoteAmount, 2), // e.g., "19,680.32"
     amountUsd: formatNumber(item.quoteAmountUsd, 2), // e.g., "68,668.65"
-    price: `$${item.price.toFixed(6)}`, // e.g., "$2.278700"
+    price: `$${item.price.toFixed(3)}`, // e.g., "$2.278700"
     time: item.time
       ? formatPurchaseTime(item.time)
       : formatPurchaseTime(apiData.timeseries[index]?.time || new Date().toISOString()),
@@ -42,9 +42,9 @@ export const transformApiToPurchaseTable = (apiData: TokenPurchaseApiResponse) =
   }));
 };
 
-// Transform your timeseries data for the Purchase Chart (simplified)
-export const transformApiToPurchaseChart = (apiData: TokenPurchaseApiResponse, daysLimit: number = 30) => {
-  // Filter timeseries to last N days to avoid overwhelming the chart
+// Transform your timeseries data for the Purchase Chart (now using hourly data)
+export const transformApiToPurchaseChart = (apiData: TokenPurchaseApiResponse, daysLimit: number = 7) => {
+  // Filter timeseries to last N days to avoid overwhelming the chart (reduced default for hourly data)
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - daysLimit);
 
@@ -53,22 +53,27 @@ export const transformApiToPurchaseChart = (apiData: TokenPurchaseApiResponse, d
     return itemDate >= cutoffDate;
   });
 
-  // Group recent timeseries by day to get daily totals
-  const dailyData = groupByDay(recentTimeseries);
+  // Group recent timeseries by hour to get hourly totals
+  const hourlyData = groupByHour(recentTimeseries);
 
   const dates: string[] = [];
   const purchases: number[] = [];
 
-  // Sort dates to ensure chronological order
-  const sortedDates = Object.keys(dailyData).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+  // Sort hour keys to ensure chronological order
+  const sortedHours = Object.keys(hourlyData).sort((a, b) => {
+    // Convert YYYY-MM-DD-HH format back to Date for comparison
+    const dateA = new Date(a.replace(/-(\d{2})$/, 'T$1:00:00'));
+    const dateB = new Date(b.replace(/-(\d{2})$/, 'T$1:00:00'));
+    return dateA.getTime() - dateB.getTime();
+  });
 
-  sortedDates.forEach((date) => {
-    const dayData = dailyData[date];
+  sortedHours.forEach((hourKey) => {
+    const hourData = hourlyData[hourKey];
     // Since we want to show LAB token purchases, we need to calculate LAB amounts from the individual transactions
     // For now, we'll use quoteAmount (BNB) but we need to clarify what should be displayed
-    const totalPurchases = dayData.reduce((sum, item) => sum + item.quoteAmount, 0);
+    const totalPurchases = hourData.reduce((sum, item) => sum + item.quoteAmount, 0);
 
-    dates.push(formatChartDate(date));
+    dates.push(formatChartDateHourly(hourKey));
     purchases.push(totalPurchases);
   });
 
@@ -78,8 +83,8 @@ export const transformApiToPurchaseChart = (apiData: TokenPurchaseApiResponse, d
     totalDataPoints: apiData.timeseries.length,
     filteredDataPoints: recentTimeseries.length,
     dateRange: {
-      start: sortedDates[0] || null,
-      end: sortedDates[sortedDates.length - 1] || null,
+      start: sortedHours[0] || null,
+      end: sortedHours[sortedHours.length - 1] || null,
     },
   };
 }; // Helper functions
@@ -112,20 +117,48 @@ const formatPurchaseTime = (isoString: string): string => {
   });
 };
 
-const formatChartDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+// BACKUP: Daily date formatting function (saved for future restoration)
+// const formatChartDate = (dateString: string): string => {
+//   const date = new Date(dateString);
+//   return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+// };
+
+// NEW: Hourly date formatting function
+const formatChartDateHourly = (hourKeyString: string): string => {
+  // Convert YYYY-MM-DD-HH format to readable format
+  const [year, month, day, hour] = hourKeyString.split('-');
+  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour));
+
+  return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:00`;
 };
 
-const groupByDay = (timeseries: { quoteAmount: number; time: string }[]) => {
+// BACKUP: Daily grouping function (saved for future restoration)
+// const groupByDay = (timeseries: { quoteAmount: number; time: string }[]) => {
+//   const groups: { [key: string]: { quoteAmount: number; time: string }[] } = {};
+
+//   timeseries.forEach((item) => {
+//     const date = new Date(item.time).toISOString().split('T')[0]; // YYYY-MM-DD
+//     if (!groups[date]) {
+//       groups[date] = [];
+//     }
+//     groups[date].push(item);
+//   });
+
+//   return groups;
+// };
+
+// NEW: Hourly grouping function
+const groupByHour = (timeseries: { quoteAmount: number; time: string }[]) => {
   const groups: { [key: string]: { quoteAmount: number; time: string }[] } = {};
 
   timeseries.forEach((item) => {
-    const date = new Date(item.time).toISOString().split('T')[0]; // YYYY-MM-DD
-    if (!groups[date]) {
-      groups[date] = [];
+    const date = new Date(item.time);
+    // Group by YYYY-MM-DD-HH format for hourly grouping
+    const hourKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}-${date.getHours().toString().padStart(2, '0')}`;
+    if (!groups[hourKey]) {
+      groups[hourKey] = [];
     }
-    groups[date].push(item);
+    groups[hourKey].push(item);
   });
 
   return groups;
